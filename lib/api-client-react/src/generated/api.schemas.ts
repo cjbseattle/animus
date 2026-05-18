@@ -103,13 +103,76 @@ export interface BreakContent {
   thumbnailUrl?: string | null;
 }
 
-export interface LeaderboardEntry {
-  rank: number;
+export type ShopItemType = typeof ShopItemType[keyof typeof ShopItemType];
+
+
+export const ShopItemType = {
+  hint: 'hint',
+  skip: 'skip',
+  shield: 'shield',
+} as const;
+
+export interface ShopItem {
+  id: string;
+  name: string;
+  description: string;
+  cost: number;
+  type: ShopItemType;
+  icon: string;
+}
+
+export interface PurchaseInput {
+  itemId: string;
   userId: number;
-  username: string;
-  currency: number;
-  currentStreak: number;
-  totalCorrect: number;
+}
+
+export interface PurchaseResult {
+  success: boolean;
+  remainingCurrency: number;
+  powerupType: string;
+  newQuantity: number;
+}
+
+export type UserPowerupType = typeof UserPowerupType[keyof typeof UserPowerupType];
+
+
+export const UserPowerupType = {
+  hint: 'hint',
+  skip: 'skip',
+  shield: 'shield',
+} as const;
+
+export interface UserPowerup {
+  type: UserPowerupType;
+  quantity: number;
+}
+
+export type MissedQuestionType = typeof MissedQuestionType[keyof typeof MissedQuestionType];
+
+
+export const MissedQuestionType = {
+  math: 'math',
+  reading: 'reading',
+} as const;
+
+export type MissedQuestionDifficulty = typeof MissedQuestionDifficulty[keyof typeof MissedQuestionDifficulty];
+
+
+export const MissedQuestionDifficulty = {
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard',
+} as const;
+
+export interface MissedQuestion {
+  id: number;
+  type: MissedQuestionType;
+  content: string;
+  /** @nullable */
+  passage?: string | null;
+  difficulty: MissedQuestionDifficulty;
+  missCount: number;
+  attempts: number;
 }
 
 export type GetRandomQuestionParams = {
@@ -141,7 +204,7 @@ export type GetBreakContentParams = {
 limit?: number;
 };
 
-export type GetLeaderboardParams = {
+export type GetMissedQuestionsParams = {
 limit?: number;
 };
 

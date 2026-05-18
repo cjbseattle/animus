@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Home, Trophy, BarChart2 } from "lucide-react";
+import { Home, ShoppingBag, BarChart2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
@@ -7,7 +7,7 @@ export function BottomNav() {
 
   const links = [
     { href: "/", icon: Home, label: "Home" },
-    { href: "/leaderboard", icon: Trophy, label: "Leaderboard" },
+    { href: "/shop", icon: ShoppingBag, label: "Shop" },
     { href: "/stats", icon: BarChart2, label: "Stats" },
   ];
 

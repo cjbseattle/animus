@@ -7,7 +7,7 @@ import { Layout } from "@/components/layout";
 import Home from "@/pages/home";
 import Challenge from "@/pages/challenge";
 import Break from "@/pages/break";
-import Leaderboard from "@/pages/leaderboard";
+import Shop from "@/pages/shop";
 import Stats from "@/pages/stats";
 import NotFound from "@/pages/not-found";
 
@@ -20,7 +20,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/challenge" component={Challenge} />
         <Route path="/break" component={Break} />
-        <Route path="/leaderboard" component={Leaderboard} />
+        <Route path="/shop" component={Shop} />
         <Route path="/stats" component={Stats} />
         <Route component={NotFound} />
       </Switch>

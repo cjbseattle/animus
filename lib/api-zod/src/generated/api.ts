@@ -152,20 +152,61 @@ export const GetBreakContentResponse = zod.array(GetBreakContentResponseItem)
 
 
 /**
- * @summary Get top users by currency
+ * @summary Get all available shop items
  */
-export const GetLeaderboardQueryParams = zod.object({
+export const GetShopItemsResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "cost": zod.number(),
+  "type": zod.enum(['hint', 'skip', 'shield']),
+  "icon": zod.string()
+})
+export const GetShopItemsResponse = zod.array(GetShopItemsResponseItem)
+
+
+/**
+ * @summary Purchase a power-up with currency
+ */
+export const PurchaseItemBody = zod.object({
+  "itemId": zod.string(),
+  "userId": zod.number()
+})
+
+export const PurchaseItemResponse = zod.object({
+  "success": zod.boolean(),
+  "remainingCurrency": zod.number(),
+  "powerupType": zod.string(),
+  "newQuantity": zod.number()
+})
+
+
+/**
+ * @summary Get current user's owned power-ups
+ */
+export const GetMyPowerupsResponseItem = zod.object({
+  "type": zod.enum(['hint', 'skip', 'shield']),
+  "quantity": zod.number()
+})
+export const GetMyPowerupsResponse = zod.array(GetMyPowerupsResponseItem)
+
+
+/**
+ * @summary Get questions the user misses most frequently
+ */
+export const GetMissedQuestionsQueryParams = zod.object({
   "limit": zod.coerce.number().optional()
 })
 
-export const GetLeaderboardResponseItem = zod.object({
-  "rank": zod.number(),
-  "userId": zod.number(),
-  "username": zod.string(),
-  "currency": zod.number(),
-  "currentStreak": zod.number(),
-  "totalCorrect": zod.number()
+export const GetMissedQuestionsResponseItem = zod.object({
+  "id": zod.number(),
+  "type": zod.enum(['math', 'reading']),
+  "content": zod.string(),
+  "passage": zod.string().nullish(),
+  "difficulty": zod.enum(['easy', 'medium', 'hard']),
+  "missCount": zod.number(),
+  "attempts": zod.number()
 })
-export const GetLeaderboardResponse = zod.array(GetLeaderboardResponseItem)
+export const GetMissedQuestionsResponse = zod.array(GetMissedQuestionsResponseItem)
 
 

@@ -24,13 +24,17 @@ import type {
   AnswerResult,
   BreakContent,
   GetBreakContentParams,
-  GetLeaderboardParams,
+  GetMissedQuestionsParams,
   GetRandomQuestionParams,
   HealthStatus,
-  LeaderboardEntry,
   ListQuestionsParams,
+  MissedQuestion,
+  PurchaseInput,
+  PurchaseResult,
   Question,
+  ShopItem,
   UserPerformance,
+  UserPowerup,
   UserStats
 } from './api.schemas';
 
@@ -678,27 +682,20 @@ export function useGetBreakContent<TData = Awaited<ReturnType<typeof getBreakCon
 
 
 
-export const getGetLeaderboardUrl = (params?: GetLeaderboardParams,) => {
-  const normalizedParams = new URLSearchParams();
+export const getGetShopItemsUrl = () => {
 
-  Object.entries(params || {}).forEach(([key, value]) => {
 
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : value.toString())
-    }
-  });
 
-  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/api/leaderboard?${stringifiedParams}` : `/api/leaderboard`
+  return `/api/shop/items`
 }
 
 /**
- * @summary Get top users by currency
+ * @summary Get all available shop items
  */
-export const getLeaderboard = async (params?: GetLeaderboardParams, options?: RequestInit): Promise<LeaderboardEntry[]> => {
+export const getShopItems = async ( options?: RequestInit): Promise<ShopItem[]> => {
 
-  return customFetch<LeaderboardEntry[]>(getGetLeaderboardUrl(params),
+  return customFetch<ShopItem[]>(getGetShopItemsUrl(),
   {
     ...options,
     method: 'GET'
@@ -711,45 +708,277 @@ export const getLeaderboard = async (params?: GetLeaderboardParams, options?: Re
 
 
 
-export const getGetLeaderboardQueryKey = (params?: GetLeaderboardParams,) => {
+export const getGetShopItemsQueryKey = () => {
     return [
-    `/api/leaderboard`, ...(params ? [params] : [])
+    `/api/shop/items`
     ] as const;
     }
 
 
-export const getGetLeaderboardQueryOptions = <TData = Awaited<ReturnType<typeof getLeaderboard>>, TError = ErrorType<unknown>>(params?: GetLeaderboardParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLeaderboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetShopItemsQueryOptions = <TData = Awaited<ReturnType<typeof getShopItems>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetLeaderboardQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetShopItemsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getLeaderboard>>> = ({ signal }) => getLeaderboard(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getShopItems>>> = ({ signal }) => getShopItems({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getLeaderboard>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetLeaderboardQueryResult = NonNullable<Awaited<ReturnType<typeof getLeaderboard>>>
-export type GetLeaderboardQueryError = ErrorType<unknown>
+export type GetShopItemsQueryResult = NonNullable<Awaited<ReturnType<typeof getShopItems>>>
+export type GetShopItemsQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Get top users by currency
+ * @summary Get all available shop items
  */
 
-export function useGetLeaderboard<TData = Awaited<ReturnType<typeof getLeaderboard>>, TError = ErrorType<unknown>>(
- params?: GetLeaderboardParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getLeaderboard>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export function useGetShopItems<TData = Awaited<ReturnType<typeof getShopItems>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getShopItems>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetLeaderboardQueryOptions(params,options)
+  const queryOptions = getGetShopItemsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getPurchaseItemUrl = () => {
+
+
+
+
+  return `/api/shop/purchase`
+}
+
+/**
+ * @summary Purchase a power-up with currency
+ */
+export const purchaseItem = async (purchaseInput: PurchaseInput, options?: RequestInit): Promise<PurchaseResult> => {
+
+  return customFetch<PurchaseResult>(getPurchaseItemUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      purchaseInput,)
+  }
+);}
+
+
+
+
+export const getPurchaseItemMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof purchaseItem>>, TError,{data: BodyType<PurchaseInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof purchaseItem>>, TError,{data: BodyType<PurchaseInput>}, TContext> => {
+
+const mutationKey = ['purchaseItem'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof purchaseItem>>, {data: BodyType<PurchaseInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  purchaseItem(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PurchaseItemMutationResult = NonNullable<Awaited<ReturnType<typeof purchaseItem>>>
+    export type PurchaseItemMutationBody = BodyType<PurchaseInput>
+    export type PurchaseItemMutationError = ErrorType<void>
+
+    /**
+ * @summary Purchase a power-up with currency
+ */
+export const usePurchaseItem = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof purchaseItem>>, TError,{data: BodyType<PurchaseInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof purchaseItem>>,
+        TError,
+        {data: BodyType<PurchaseInput>},
+        TContext
+      > => {
+      return useMutation(getPurchaseItemMutationOptions(options));
+    }
+
+export const getGetMyPowerupsUrl = () => {
+
+
+
+
+  return `/api/users/me/powerups`
+}
+
+/**
+ * @summary Get current user's owned power-ups
+ */
+export const getMyPowerups = async ( options?: RequestInit): Promise<UserPowerup[]> => {
+
+  return customFetch<UserPowerup[]>(getGetMyPowerupsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyPowerupsQueryKey = () => {
+    return [
+    `/api/users/me/powerups`
+    ] as const;
+    }
+
+
+export const getGetMyPowerupsQueryOptions = <TData = Awaited<ReturnType<typeof getMyPowerups>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyPowerups>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyPowerupsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyPowerups>>> = ({ signal }) => getMyPowerups({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyPowerups>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyPowerupsQueryResult = NonNullable<Awaited<ReturnType<typeof getMyPowerups>>>
+export type GetMyPowerupsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user's owned power-ups
+ */
+
+export function useGetMyPowerups<TData = Awaited<ReturnType<typeof getMyPowerups>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyPowerups>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyPowerupsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetMissedQuestionsUrl = (params?: GetMissedQuestionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/users/me/missed-questions?${stringifiedParams}` : `/api/users/me/missed-questions`
+}
+
+/**
+ * @summary Get questions the user misses most frequently
+ */
+export const getMissedQuestions = async (params?: GetMissedQuestionsParams, options?: RequestInit): Promise<MissedQuestion[]> => {
+
+  return customFetch<MissedQuestion[]>(getGetMissedQuestionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMissedQuestionsQueryKey = (params?: GetMissedQuestionsParams,) => {
+    return [
+    `/api/users/me/missed-questions`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMissedQuestionsQueryOptions = <TData = Awaited<ReturnType<typeof getMissedQuestions>>, TError = ErrorType<unknown>>(params?: GetMissedQuestionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMissedQuestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMissedQuestionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMissedQuestions>>> = ({ signal }) => getMissedQuestions(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMissedQuestions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMissedQuestionsQueryResult = NonNullable<Awaited<ReturnType<typeof getMissedQuestions>>>
+export type GetMissedQuestionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get questions the user misses most frequently
+ */
+
+export function useGetMissedQuestions<TData = Awaited<ReturnType<typeof getMissedQuestions>>, TError = ErrorType<unknown>>(
+ params?: GetMissedQuestionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMissedQuestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMissedQuestionsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

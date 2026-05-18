@@ -6,11 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface LeaderboardEntry {
-  rank: number;
+export interface PurchaseInput {
+  itemId: string;
   userId: number;
-  username: string;
-  currency: number;
-  currentStreak: number;
-  totalCorrect: number;
 }

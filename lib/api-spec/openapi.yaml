@@ -18,8 +18,8 @@ tags:
     description: User stats and currency
   - name: break
     description: Scroll break content
-  - name: leaderboard
-    description: Leaderboard operations
+  - name: shop
+    description: Shop and power-up operations
 paths:
   /healthz:
     get:
@@ -161,11 +161,62 @@ paths:
                 items:
                   $ref: "#/components/schemas/BreakContent"
 
-  /leaderboard:
+  /shop/items:
     get:
-      operationId: getLeaderboard
-      tags: [leaderboard]
-      summary: Get top users by currency
+      operationId: getShopItems
+      tags: [shop]
+      summary: Get all available shop items
+      responses:
+        "200":
+          description: List of shop items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShopItem"
+
+  /shop/purchase:
+    post:
+      operationId: purchaseItem
+      tags: [shop]
+      summary: Purchase a power-up with currency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PurchaseInput"
+      responses:
+        "200":
+          description: Purchase result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PurchaseResult"
+        "400":
+          description: Insufficient currency or invalid item
+
+  /users/me/powerups:
+    get:
+      operationId: getMyPowerups
+      tags: [users]
+      summary: Get current user's owned power-ups
+      responses:
+        "200":
+          description: User power-ups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserPowerup"
+
+  /users/me/missed-questions:
+    get:
+      operationId: getMissedQuestions
+      tags: [users]
+      summary: Get questions the user misses most frequently
       parameters:
         - name: limit
           in: query
@@ -174,13 +225,13 @@ paths:
             type: integer
       responses:
         "200":
-          description: Leaderboard entries
+          description: Frequently missed questions
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/LeaderboardEntry"
+                  $ref: "#/components/schemas/MissedQuestion"
 
 components:
   schemas:
@@ -320,19 +371,73 @@ components:
         thumbnailUrl:
           type: ["string", "null"]
 
-    LeaderboardEntry:
+    ShopItem:
       type: object
-      required: [rank, userId, username, currency, currentStreak, totalCorrect]
+      required: [id, name, description, cost, type, icon]
       properties:
-        rank:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        cost:
           type: integer
+        type:
+          type: string
+          enum: [hint, skip, shield]
+        icon:
+          type: string
+
+    PurchaseInput:
+      type: object
+      required: [itemId, userId]
+      properties:
+        itemId:
+          type: string
         userId:
           type: integer
-        username:
+
+    PurchaseResult:
+      type: object
+      required: [success, remainingCurrency, powerupType, newQuantity]
+      properties:
+        success:
+          type: boolean
+        remainingCurrency:
+          type: integer
+        powerupType:
           type: string
-        currency:
+        newQuantity:
           type: integer
-        currentStreak:
+
+    UserPowerup:
+      type: object
+      required: [type, quantity]
+      properties:
+        type:
+          type: string
+          enum: [hint, skip, shield]
+        quantity:
           type: integer
-        totalCorrect:
+
+    MissedQuestion:
+      type: object
+      required: [id, type, content, difficulty, missCount, attempts]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [math, reading]
+        content:
+          type: string
+        passage:
+          type: ["string", "null"]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        missCount:
+          type: integer
+        attempts:
           type: integer
