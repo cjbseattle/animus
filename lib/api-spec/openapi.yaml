@@ -3,13 +3,23 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Animus SAT Prep API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: questions
+    description: SAT question operations
+  - name: answers
+    description: Answer submission operations
+  - name: users
+    description: User stats and currency
+  - name: break
+    description: Scroll break content
+  - name: leaderboard
+    description: Leaderboard operations
 paths:
   /healthz:
     get:
@@ -24,6 +34,154 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /questions/daily:
+    get:
+      operationId: getDailyQuestion
+      tags: [questions]
+      summary: Get today's daily challenge question
+      responses:
+        "200":
+          description: Daily question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+
+  /questions/random:
+    get:
+      operationId: getRandomQuestion
+      tags: [questions]
+      summary: Get a random SAT question
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [math, reading]
+      responses:
+        "200":
+          description: Random question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Question"
+
+  /questions:
+    get:
+      operationId: listQuestions
+      tags: [questions]
+      summary: List questions with optional type filter
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [math, reading]
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Question"
+
+  /answers:
+    post:
+      operationId: submitAnswer
+      tags: [answers]
+      summary: Submit an answer to a question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnswerInput"
+      responses:
+        "200":
+          description: Answer result with updated user stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnswerResult"
+
+  /users/me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current user stats
+      responses:
+        "200":
+          description: User stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserStats"
+
+  /users/me/stats:
+    get:
+      operationId: getMeStats
+      tags: [users]
+      summary: Get detailed user performance stats
+      responses:
+        "200":
+          description: Detailed user performance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPerformance"
+
+  /break/content:
+    get:
+      operationId: getBreakContent
+      tags: [break]
+      summary: Get scroll break content (reels)
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of break content items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BreakContent"
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [leaderboard]
+      summary: Get top users by currency
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +192,147 @@ components:
       required:
         - status
 
+    Question:
+      type: object
+      required: [id, type, content, choices, difficulty]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [math, reading]
+        content:
+          type: string
+        passage:
+          type: ["string", "null"]
+        choices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Choice"
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        explanation:
+          type: ["string", "null"]
+
+    Choice:
+      type: object
+      required: [id, label, text]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        text:
+          type: string
+
+    AnswerInput:
+      type: object
+      required: [questionId, choiceId, userId]
+      properties:
+        questionId:
+          type: integer
+        choiceId:
+          type: string
+        userId:
+          type: integer
+
+    AnswerResult:
+      type: object
+      required: [isCorrect, correctChoiceId, explanation, currencyEarned, newStreak, streakMultiplier, totalCurrency, breakUnlocked]
+      properties:
+        isCorrect:
+          type: boolean
+        correctChoiceId:
+          type: string
+        explanation:
+          type: string
+        currencyEarned:
+          type: integer
+        newStreak:
+          type: integer
+        streakMultiplier:
+          type: number
+        totalCurrency:
+          type: integer
+        breakUnlocked:
+          type: boolean
+        consecutiveCorrect:
+          type: integer
+
+    UserStats:
+      type: object
+      required: [id, username, currency, currentStreak, longestStreak, totalCorrect, totalAnswered, consecutiveCorrect]
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        currency:
+          type: integer
+        currentStreak:
+          type: integer
+        longestStreak:
+          type: integer
+        totalCorrect:
+          type: integer
+        totalAnswered:
+          type: integer
+        consecutiveCorrect:
+          type: integer
+
+    UserPerformance:
+      type: object
+      required: [totalAnswered, totalCorrect, mathCorrect, mathAnswered, readingCorrect, readingAnswered, accuracy, mathAccuracy, readingAccuracy]
+      properties:
+        totalAnswered:
+          type: integer
+        totalCorrect:
+          type: integer
+        mathCorrect:
+          type: integer
+        mathAnswered:
+          type: integer
+        readingCorrect:
+          type: integer
+        readingAnswered:
+          type: integer
+        accuracy:
+          type: number
+        mathAccuracy:
+          type: number
+        readingAccuracy:
+          type: number
+
+    BreakContent:
+      type: object
+      required: [id, type, url, caption]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [video, image, gif]
+        url:
+          type: string
+        caption:
+          type: string
+        thumbnailUrl:
+          type: ["string", "null"]
+
+    LeaderboardEntry:
+      type: object
+      required: [rank, userId, username, currency, currentStreak, totalCorrect]
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: integer
+        username:
+          type: string
+        currency:
+          type: integer
+        currentStreak:
+          type: integer
+        totalCorrect:
+          type: integer
