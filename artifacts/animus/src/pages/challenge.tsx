@@ -11,14 +11,15 @@ import { cn } from "@/lib/utils";
 export default function Challenge() {
   const [location, setLocation] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
-  const type = searchParams.get("type") as "math" | "reading" || "math";
-  
+  const typeParam = searchParams.get("type") as "math" | "reading" | null;
+
   const queryClient = useQueryClient();
   const { data: user } = useGetMe();
-  
-  const { data: question, isLoading, refetch, isRefetching } = useGetRandomQuestion({ type }, {
-    query: { refetchOnWindowFocus: false, staleTime: 0 }
-  });
+
+  const { data: question, isLoading, refetch, isRefetching } = useGetRandomQuestion(
+    typeParam ? { type: typeParam } : {},
+    { query: { refetchOnWindowFocus: false, staleTime: 0 } }
+  );
   
   const submitAnswer = useSubmitAnswer();
   
@@ -98,7 +99,7 @@ export default function Challenge() {
             )}>
               {question.difficulty}
             </span>
-            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">{type}</span>
+            <span className="text-xs font-mono text-muted-foreground uppercase tracking-widest">{question.type}</span>
           </div>
           
           {question.passage && (

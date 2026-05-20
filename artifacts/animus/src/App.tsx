@@ -9,7 +9,6 @@ import Challenge from "@/pages/challenge";
 import Break from "@/pages/break";
 import Shop from "@/pages/shop";
 import Stats from "@/pages/stats";
-import Questions from "@/pages/questions";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -22,7 +21,6 @@ function Router() {
         <Route path="/challenge" component={Challenge} />
         <Route path="/break" component={Break} />
         <Route path="/shop" component={Shop} />
-        <Route path="/questions" component={Questions} />
         <Route path="/stats" component={Stats} />
         <Route component={NotFound} />
       </Switch>

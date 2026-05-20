@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { useGetMe, useGetDailyQuestion } from "@workspace/api-client-react";
-import { Zap, Flame, BrainCircuit, BookOpen, ChevronRight, Calculator } from "lucide-react";
+import { Zap, Flame, BrainCircuit, BookOpen, ChevronRight, Calculator, Shuffle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
+type Mode = "math" | "reading" | "both";
 
 function getNextMilestone(consecutiveCorrect: number = 0) {
   if (consecutiveCorrect < 5) return { next: 5, reward: "+20 bonus", current: consecutiveCorrect };
@@ -17,8 +19,13 @@ function getNextMilestone(consecutiveCorrect: number = 0) {
 
 export default function Home() {
   const { data: user, isLoading: isLoadingUser } = useGetMe();
-  const { data: dailyQ } = useGetDailyQuestion();
-  const [selectedMode, setSelectedMode] = useState<"math" | "reading">("math");
+  useGetDailyQuestion();
+  const [selectedMode, setSelectedMode] = useState<Mode>("math");
+
+  const challengeUrl =
+    selectedMode === "both"
+      ? "/challenge"
+      : `/challenge?type=${selectedMode}`;
 
   return (
     <div className="flex-1 flex flex-col pt-8 pb-24 px-6 gap-8 overflow-y-auto">
@@ -65,9 +72,9 @@ export default function Home() {
                   {getNextMilestone(user?.consecutiveCorrect).reward}
                 </div>
               </div>
-              <Progress 
-                value={((user?.consecutiveCorrect || 0) / getNextMilestone(user?.consecutiveCorrect).next) * 100} 
-                className="h-2 bg-black/50" 
+              <Progress
+                value={((user?.consecutiveCorrect || 0) / getNextMilestone(user?.consecutiveCorrect).next) * 100}
+                className="h-2 bg-black/50"
                 indicatorClassName="bg-primary shadow-[0_0_10px_rgba(0,255,255,0.8)]"
               />
             </div>
@@ -77,35 +84,48 @@ export default function Home() {
 
       {/* Mode Selector & Action */}
       <section className="space-y-4 mt-auto">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <button
             onClick={() => setSelectedMode("math")}
             className={cn(
               "flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200",
-              selectedMode === "math" 
-                ? "border-primary bg-primary/10 text-white shadow-[0_0_20px_rgba(0,255,255,0.2)]" 
+              selectedMode === "math"
+                ? "border-primary bg-primary/10 text-white shadow-[0_0_20px_rgba(0,255,255,0.2)]"
                 : "border-border bg-card text-muted-foreground hover:bg-card/80 hover:border-muted"
             )}
           >
-            <Calculator className={cn("w-8 h-8 mb-2", selectedMode === "math" && "text-primary")} />
-            <span className="font-bold uppercase tracking-wide text-sm">Math</span>
+            <Calculator className={cn("w-7 h-7 mb-2", selectedMode === "math" && "text-primary")} />
+            <span className="font-bold uppercase tracking-wide text-xs">Math</span>
           </button>
-          
+
+          <button
+            onClick={() => setSelectedMode("both")}
+            className={cn(
+              "flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200",
+              selectedMode === "both"
+                ? "border-white bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+                : "border-border bg-card text-muted-foreground hover:bg-card/80 hover:border-muted"
+            )}
+          >
+            <Shuffle className={cn("w-7 h-7 mb-2", selectedMode === "both" && "text-white")} />
+            <span className="font-bold uppercase tracking-wide text-xs">Both</span>
+          </button>
+
           <button
             onClick={() => setSelectedMode("reading")}
             className={cn(
               "flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all duration-200",
-              selectedMode === "reading" 
-                ? "border-accent bg-accent/10 text-white shadow-[0_0_20px_rgba(255,0,255,0.2)]" 
+              selectedMode === "reading"
+                ? "border-accent bg-accent/10 text-white shadow-[0_0_20px_rgba(255,0,255,0.2)]"
                 : "border-border bg-card text-muted-foreground hover:bg-card/80 hover:border-muted"
             )}
           >
-            <BookOpen className={cn("w-8 h-8 mb-2", selectedMode === "reading" && "text-accent")} />
-            <span className="font-bold uppercase tracking-wide text-sm">Reading</span>
+            <BookOpen className={cn("w-7 h-7 mb-2", selectedMode === "reading" && "text-accent")} />
+            <span className="font-bold uppercase tracking-wide text-xs">Reading</span>
           </button>
         </div>
 
-        <Link href={`/challenge?type=${selectedMode}`} className="block">
+        <Link href={challengeUrl} className="block">
           <button className="w-full relative group overflow-hidden rounded-2xl bg-white text-black p-5 font-black text-xl tracking-tight flex items-center justify-center gap-3 transition-transform active:scale-95">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 ease-in-out" />
             <BrainCircuit className="w-6 h-6" />
