@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { ensureQuestionPool } from "./lib/question-generator";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +23,9 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+
+  // Non-blocking: fill question pool with AI-generated questions in background
+  ensureQuestionPool(logger).catch((err) =>
+    logger.error({ err }, "Question pool generation failed")
+  );
 });
