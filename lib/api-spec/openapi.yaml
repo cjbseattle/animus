@@ -60,6 +60,18 @@ paths:
           schema:
             type: string
             enum: [math, reading]
+        - name: difficulty
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [easy, medium, hard]
+        - name: excludeIds
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Comma-separated list of question IDs to exclude
       responses:
         "200":
           description: Random question

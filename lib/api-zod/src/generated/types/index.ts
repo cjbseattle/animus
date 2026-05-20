@@ -15,6 +15,7 @@ export * from './dailyActivity';
 export * from './getBreakContentParams';
 export * from './getMissedQuestionsParams';
 export * from './getMyActivityParams';
+export * from './getRandomQuestionDifficulty';
 export * from './getRandomQuestionParams';
 export * from './getRandomQuestionType';
 export * from './healthStatus';

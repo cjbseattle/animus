@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, questionsTable } from "@workspace/db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and, notInArray } from "drizzle-orm";
 import {
   GetRandomQuestionQueryParams,
   ListQuestionsQueryParams,
@@ -26,18 +26,35 @@ router.get("/questions/random", async (req, res): Promise<void> => {
     return;
   }
 
-  let rows;
-  if (parsed.data.type) {
+  const { type, difficulty, excludeIds } = parsed.data;
+
+  const excludedIdList = excludeIds
+    ? excludeIds.split(",").map(Number).filter((n) => !isNaN(n))
+    : [];
+
+  // Build conditions
+  const conditions = [];
+  if (type) conditions.push(eq(questionsTable.type, type));
+  if (difficulty) conditions.push(eq(questionsTable.difficulty, difficulty));
+  if (excludedIdList.length > 0) conditions.push(notInArray(questionsTable.id, excludedIdList));
+
+  let rows = await db
+    .select()
+    .from(questionsTable)
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(sql`RANDOM()`)
+    .limit(1);
+
+  // If no questions at the requested difficulty, fall back without difficulty filter
+  if (rows.length === 0 && difficulty) {
+    const fallbackConditions = [];
+    if (type) fallbackConditions.push(eq(questionsTable.type, type));
+    if (excludedIdList.length > 0) fallbackConditions.push(notInArray(questionsTable.id, excludedIdList));
+
     rows = await db
       .select()
       .from(questionsTable)
-      .where(eq(questionsTable.type, parsed.data.type))
-      .orderBy(sql`RANDOM()`)
-      .limit(1);
-  } else {
-    rows = await db
-      .select()
-      .from(questionsTable)
+      .where(fallbackConditions.length > 0 ? and(...fallbackConditions) : undefined)
       .orderBy(sql`RANDOM()`)
       .limit(1);
   }

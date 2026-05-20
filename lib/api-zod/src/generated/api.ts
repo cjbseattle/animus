@@ -39,7 +39,9 @@ export const GetDailyQuestionResponse = zod.object({
  * @summary Get a random SAT question
  */
 export const GetRandomQuestionQueryParams = zod.object({
-  "type": zod.enum(['math', 'reading']).optional()
+  "type": zod.enum(['math', 'reading']).optional(),
+  "difficulty": zod.enum(['easy', 'medium', 'hard']).optional(),
+  "excludeIds": zod.coerce.string().optional()
 })
 
 export const GetRandomQuestionResponse = zod.object({
