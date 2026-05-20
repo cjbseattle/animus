@@ -212,6 +212,46 @@ paths:
                 items:
                   $ref: "#/components/schemas/UserPowerup"
 
+  /users/me/username:
+    put:
+      operationId: updateUsername
+      tags: [users]
+      summary: Update the current user's display name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUsernameInput"
+      responses:
+        "200":
+          description: Updated user stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserStats"
+
+  /users/me/activity:
+    get:
+      operationId: getMyActivity
+      tags: [users]
+      summary: Get the user's daily practice activity for the past N days
+      parameters:
+        - name: days
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Array of daily activity entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DailyActivity"
+
   /users/me/missed-questions:
     get:
       operationId: getMissedQuestions
@@ -440,4 +480,22 @@ components:
         missCount:
           type: integer
         attempts:
+          type: integer
+
+    UpdateUsernameInput:
+      type: object
+      required: [username]
+      properties:
+        username:
+          type: string
+
+    DailyActivity:
+      type: object
+      required: [date, count, correct]
+      properties:
+        date:
+          type: string
+        count:
+          type: integer
+        correct:
           type: integer

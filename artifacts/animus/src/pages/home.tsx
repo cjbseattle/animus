@@ -6,74 +6,92 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { Onboarding } from "@/components/onboarding";
+import { StreakCalendar } from "@/components/streak-calendar";
 
 type Mode = "math" | "reading" | "both";
 
 function getNextMilestone(consecutiveCorrect: number = 0) {
-  if (consecutiveCorrect < 5) return { next: 5, reward: "+20 bonus", current: consecutiveCorrect };
-  if (consecutiveCorrect < 10) return { next: 10, reward: "2x multiplier", current: consecutiveCorrect };
-  if (consecutiveCorrect < 20) return { next: 20, reward: "4x multiplier", current: consecutiveCorrect };
-  if (consecutiveCorrect < 30) return { next: 30, reward: "Scroll break", current: consecutiveCorrect };
-  return { next: consecutiveCorrect + 10, reward: "Bonus", current: consecutiveCorrect };
+  if (consecutiveCorrect < 5) return { next: 5, reward: "+20 bonus" };
+  if (consecutiveCorrect < 10) return { next: 10, reward: "2x multiplier" };
+  if (consecutiveCorrect < 20) return { next: 20, reward: "4x multiplier" };
+  if (consecutiveCorrect < 30) return { next: 30, reward: "Scroll break" };
+  return { next: consecutiveCorrect + 10, reward: "Bonus" };
 }
 
 export default function Home() {
   const { data: user, isLoading: isLoadingUser } = useGetMe();
   useGetDailyQuestion();
   const [selectedMode, setSelectedMode] = useState<Mode>("math");
+  const [onboardingDone, setOnboardingDone] = useState(false);
 
   const challengeUrl =
-    selectedMode === "both"
-      ? "/challenge"
-      : `/challenge?type=${selectedMode}`;
+    selectedMode === "both" ? "/challenge" : `/challenge?type=${selectedMode}`;
+
+  // Show onboarding if the user hasn't set a name yet
+  const isFirstTime = !isLoadingUser && user?.username === "student" && !onboardingDone;
+  if (isFirstTime) {
+    return <Onboarding onComplete={() => setOnboardingDone(true)} />;
+  }
+
+  const milestone = getNextMilestone(user?.consecutiveCorrect);
+  const progressPct = ((user?.consecutiveCorrect ?? 0) / milestone.next) * 100;
 
   return (
-    <div className="flex-1 flex flex-col pt-8 pb-24 px-6 gap-8 overflow-y-auto">
-      {/* Header / Stats */}
+    <div className="flex-1 flex flex-col pt-8 pb-24 px-6 gap-6 overflow-y-auto">
+      {/* Header */}
       <header className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]">ANIMUS</h1>
-          <p className="text-muted-foreground text-sm font-mono mt-1 uppercase tracking-wider">Stay sharp</p>
+          <h1 className="text-3xl font-black tracking-tight text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]">
+            ANIMUS
+          </h1>
+          {isLoadingUser ? (
+            <Skeleton className="h-4 w-28 mt-1 rounded" />
+          ) : (
+            <p className="text-muted-foreground text-sm font-mono mt-1 uppercase tracking-wider">
+              {user?.username ?? "student"}
+            </p>
+          )}
         </div>
 
-        <div className="flex flex-col items-end gap-2">
+        <div className="flex gap-3">
           {isLoadingUser ? (
             <Skeleton className="h-8 w-24 rounded-full" />
           ) : (
-            <div className="flex gap-3">
-              <div className="flex items-center gap-1.5 bg-card border border-border px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+            <>
+              <div className="flex items-center gap-1.5 bg-card border border-border px-3 py-1.5 rounded-full">
                 <Flame className="w-4 h-4 text-accent fill-accent animate-pulse" />
-                <span className="font-bold font-mono text-white">{user?.currentStreak || 0}</span>
+                <span className="font-bold font-mono text-white">{user?.currentStreak ?? 0}</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-card border border-border px-3 py-1.5 rounded-full shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+              <div className="flex items-center gap-1.5 bg-card border border-border px-3 py-1.5 rounded-full">
                 <Zap className="w-4 h-4 text-primary fill-primary" />
-                <span className="font-bold font-mono text-white">{user?.currency || 0}</span>
+                <span className="font-bold font-mono text-white">{user?.currency ?? 0}</span>
               </div>
-            </div>
+            </>
           )}
         </div>
       </header>
 
       {/* Milestone Tracker */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-mono text-muted-foreground uppercase tracking-widest">Next Milestone</h2>
+      <section className="space-y-3">
+        <h2 className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Next Milestone</h2>
         {isLoadingUser ? (
-          <Skeleton className="h-24 w-full rounded-2xl" />
+          <Skeleton className="h-20 w-full rounded-2xl" />
         ) : (
-          <Card className="p-5 border-primary/30 bg-primary/5 relative overflow-hidden group">
+          <Card className="p-4 border-primary/30 bg-primary/5 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative z-10 flex flex-col gap-3">
-              <div className="flex justify-between items-end">
+              <div className="flex justify-between items-center">
                 <div className="text-2xl font-black font-mono text-white">
-                  {user?.consecutiveCorrect || 0}
-                  <span className="text-muted-foreground text-lg">/{getNextMilestone(user?.consecutiveCorrect).next}</span>
+                  {user?.consecutiveCorrect ?? 0}
+                  <span className="text-muted-foreground text-base">/{milestone.next}</span>
                 </div>
-                <div className="text-primary font-bold bg-primary/20 px-2 py-1 rounded text-sm uppercase tracking-wide">
-                  {getNextMilestone(user?.consecutiveCorrect).reward}
+                <div className="text-primary font-bold bg-primary/20 px-2 py-1 rounded text-xs uppercase tracking-wide">
+                  {milestone.reward}
                 </div>
               </div>
               <Progress
-                value={((user?.consecutiveCorrect || 0) / getNextMilestone(user?.consecutiveCorrect).next) * 100}
+                value={progressPct}
                 className="h-2 bg-black/50"
                 indicatorClassName="bg-primary shadow-[0_0_10px_rgba(0,255,255,0.8)]"
               />
@@ -82,7 +100,15 @@ export default function Home() {
         )}
       </section>
 
-      {/* Mode Selector & Action */}
+      {/* Streak Calendar */}
+      <section className="space-y-3">
+        <h2 className="text-xs font-mono text-muted-foreground uppercase tracking-widest">Practice History</h2>
+        <Card className="p-4 bg-card border-border/50">
+          <StreakCalendar />
+        </Card>
+      </section>
+
+      {/* Mode Selector & CTA */}
       <section className="space-y-4 mt-auto">
         <div className="grid grid-cols-3 gap-3">
           <button

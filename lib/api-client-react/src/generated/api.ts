@@ -23,8 +23,10 @@ import type {
   AnswerInput,
   AnswerResult,
   BreakContent,
+  DailyActivity,
   GetBreakContentParams,
   GetMissedQuestionsParams,
+  GetMyActivityParams,
   GetRandomQuestionParams,
   HealthStatus,
   ListQuestionsParams,
@@ -33,6 +35,7 @@ import type {
   PurchaseResult,
   Question,
   ShopItem,
+  UpdateUsernameInput,
   UserPerformance,
   UserPowerup,
   UserStats
@@ -895,6 +898,161 @@ export function useGetMyPowerups<TData = Awaited<ReturnType<typeof getMyPowerups
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetMyPowerupsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateUsernameUrl = () => {
+
+
+
+
+  return `/api/users/me/username`
+}
+
+/**
+ * @summary Update the current user's display name
+ */
+export const updateUsername = async (updateUsernameInput: UpdateUsernameInput, options?: RequestInit): Promise<UserStats> => {
+
+  return customFetch<UserStats>(getUpdateUsernameUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      updateUsernameInput,)
+  }
+);}
+
+
+
+
+export const getUpdateUsernameMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: BodyType<UpdateUsernameInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: BodyType<UpdateUsernameInput>}, TContext> => {
+
+const mutationKey = ['updateUsername'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUsername>>, {data: BodyType<UpdateUsernameInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateUsername(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateUsernameMutationResult = NonNullable<Awaited<ReturnType<typeof updateUsername>>>
+    export type UpdateUsernameMutationBody = BodyType<UpdateUsernameInput>
+    export type UpdateUsernameMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update the current user's display name
+ */
+export const useUpdateUsername = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUsername>>, TError,{data: BodyType<UpdateUsernameInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateUsername>>,
+        TError,
+        {data: BodyType<UpdateUsernameInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateUsernameMutationOptions(options));
+    }
+
+export const getGetMyActivityUrl = (params?: GetMyActivityParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/users/me/activity?${stringifiedParams}` : `/api/users/me/activity`
+}
+
+/**
+ * @summary Get the user's daily practice activity for the past N days
+ */
+export const getMyActivity = async (params?: GetMyActivityParams, options?: RequestInit): Promise<DailyActivity[]> => {
+
+  return customFetch<DailyActivity[]>(getGetMyActivityUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMyActivityQueryKey = (params?: GetMyActivityParams,) => {
+    return [
+    `/api/users/me/activity`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMyActivityQueryOptions = <TData = Awaited<ReturnType<typeof getMyActivity>>, TError = ErrorType<unknown>>(params?: GetMyActivityParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyActivity>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMyActivityQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyActivity>>> = ({ signal }) => getMyActivity(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMyActivity>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMyActivityQueryResult = NonNullable<Awaited<ReturnType<typeof getMyActivity>>>
+export type GetMyActivityQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get the user's daily practice activity for the past N days
+ */
+
+export function useGetMyActivity<TData = Awaited<ReturnType<typeof getMyActivity>>, TError = ErrorType<unknown>>(
+ params?: GetMyActivityParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMyActivity>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMyActivityQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

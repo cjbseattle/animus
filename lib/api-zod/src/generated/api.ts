@@ -192,6 +192,40 @@ export const GetMyPowerupsResponse = zod.array(GetMyPowerupsResponseItem)
 
 
 /**
+ * @summary Update the current user's display name
+ */
+export const UpdateUsernameBody = zod.object({
+  "username": zod.string()
+})
+
+export const UpdateUsernameResponse = zod.object({
+  "id": zod.number(),
+  "username": zod.string(),
+  "currency": zod.number(),
+  "currentStreak": zod.number(),
+  "longestStreak": zod.number(),
+  "totalCorrect": zod.number(),
+  "totalAnswered": zod.number(),
+  "consecutiveCorrect": zod.number()
+})
+
+
+/**
+ * @summary Get the user's daily practice activity for the past N days
+ */
+export const GetMyActivityQueryParams = zod.object({
+  "days": zod.coerce.number().optional()
+})
+
+export const GetMyActivityResponseItem = zod.object({
+  "date": zod.string(),
+  "count": zod.number(),
+  "correct": zod.number()
+})
+export const GetMyActivityResponse = zod.array(GetMyActivityResponseItem)
+
+
+/**
  * @summary Get questions the user misses most frequently
  */
 export const GetMissedQuestionsQueryParams = zod.object({

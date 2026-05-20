@@ -175,6 +175,16 @@ export interface MissedQuestion {
   attempts: number;
 }
 
+export interface UpdateUsernameInput {
+  username: string;
+}
+
+export interface DailyActivity {
+  date: string;
+  count: number;
+  correct: number;
+}
+
 export type GetRandomQuestionParams = {
 type?: GetRandomQuestionType;
 };
@@ -202,6 +212,10 @@ export const ListQuestionsType = {
 
 export type GetBreakContentParams = {
 limit?: number;
+};
+
+export type GetMyActivityParams = {
+days?: number;
 };
 
 export type GetMissedQuestionsParams = {
