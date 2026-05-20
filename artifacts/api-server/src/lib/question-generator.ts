@@ -19,12 +19,17 @@ const TARGETS: Record<string, Record<string, number>> = {
 };
 
 export async function ensureQuestionPool(logger: Logger): Promise<void> {
-  if (!process.env["OPENAI_API_KEY"]) {
-    logger.warn("OPENAI_API_KEY not set — skipping AI question generation");
+  const baseURL = process.env["AI_INTEGRATIONS_OPENAI_BASE_URL"];
+  const apiKey =
+    process.env["AI_INTEGRATIONS_OPENAI_API_KEY"] ??
+    process.env["OPENAI_API_KEY"];
+
+  if (!apiKey) {
+    logger.warn("No OpenAI API key found — skipping AI question generation");
     return;
   }
 
-  const openai = new OpenAI({ apiKey: process.env["OPENAI_API_KEY"] });
+  const openai = new OpenAI({ apiKey, ...(baseURL ? { baseURL } : {}) });
 
   for (const type of ["math", "reading"] as const) {
     for (const difficulty of ["easy", "medium", "hard"] as const) {
