@@ -84,6 +84,23 @@ export const ListQuestionsResponse = zod.array(ListQuestionsResponseItem)
 
 
 /**
+ * @summary Get an AI-generated hint for a question (costs currency)
+ */
+export const GetQuestionHintParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetQuestionHintBody = zod.object({
+  "userId": zod.number()
+})
+
+export const GetQuestionHintResponse = zod.object({
+  "hint": zod.string(),
+  "remainingCurrency": zod.number()
+})
+
+
+/**
  * @summary Submit an answer to a question
  */
 export const SubmitAnswerBody = zod.object({

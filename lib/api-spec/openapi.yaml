@@ -107,6 +107,33 @@ paths:
                 items:
                   $ref: "#/components/schemas/Question"
 
+  /questions/{id}/hint:
+    post:
+      operationId: getQuestionHint
+      tags: [questions]
+      summary: Get an AI-generated hint for a question (costs currency)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HintInput"
+      responses:
+        "200":
+          description: Hint generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HintResult"
+        "400":
+          description: Insufficient currency
+
   /answers:
     post:
       operationId: submitAnswer
@@ -492,6 +519,22 @@ components:
         missCount:
           type: integer
         attempts:
+          type: integer
+
+    HintInput:
+      type: object
+      required: [userId]
+      properties:
+        userId:
+          type: integer
+
+    HintResult:
+      type: object
+      required: [hint, remainingCurrency]
+      properties:
+        hint:
+          type: string
+        remainingCurrency:
           type: integer
 
     UpdateUsernameInput:

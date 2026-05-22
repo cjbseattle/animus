@@ -175,6 +175,15 @@ export interface MissedQuestion {
   attempts: number;
 }
 
+export interface HintInput {
+  userId: number;
+}
+
+export interface HintResult {
+  hint: string;
+  remainingCurrency: number;
+}
+
 export interface UpdateUsernameInput {
   username: string;
 }

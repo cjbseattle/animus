@@ -4,12 +4,13 @@ import {
   useGetRandomQuestion,
   useSubmitAnswer,
   useGetMe,
+  useGetQuestionHint,
   getGetMeQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Zap, Flame, X, CheckCircle2, XCircle, ArrowRight,
-  RotateCcw, Star, Target,
+  RotateCcw, Star, Target, Lightbulb, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -153,13 +154,15 @@ export default function Challenge() {
     { query: { refetchOnWindowFocus: false, staleTime: 0 } }
   );
 
-  // Record each question when it loads
+  // Record each question when it loads; reset hint state
   useEffect(() => {
     if (question?.id) {
       recentIdsRef.current = [
         ...recentIdsRef.current.filter((id) => id !== question.id),
         question.id,
       ].slice(-50);
+      setHintText(null);
+      setHintError(null);
     }
   }, [question?.id]);
 
@@ -186,6 +189,31 @@ export default function Challenge() {
   const [result, setResult] = useState<any | null>(null);
 
   const submitAnswer = useSubmitAnswer();
+  const getHint = useGetQuestionHint();
+
+  // ── Hint state ────────────────────────────────────────────────────────────
+  const [hintText, setHintText] = useState<string | null>(null);
+  const [hintError, setHintError] = useState<string | null>(null);
+
+  // ── Hint handler ─────────────────────────────────────────────────────────
+
+  const handleHint = () => {
+    if (!question || hintText || getHint.isPending) return;
+    setHintError(null);
+    getHint.mutate(
+      { id: question.id, data: { userId: 1 } },
+      {
+        onSuccess: (res) => {
+          setHintText(res.hint);
+          queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+        },
+        onError: (err: any) => {
+          const msg = err?.response?.data?.error ?? err?.message ?? "Could not load hint";
+          setHintError(msg);
+        },
+      }
+    );
+  };
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -517,6 +545,46 @@ export default function Challenge() {
             </Card>
           )}
           <h2 className="text-xl font-medium leading-snug text-white">{question.content}</h2>
+
+          {/* Hint button — only before answering */}
+          {!result && (
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                onClick={handleHint}
+                disabled={!!hintText || getHint.isPending}
+                className={cn(
+                  "flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all",
+                  hintText
+                    ? "border-yellow-500/30 text-yellow-500/50 cursor-default"
+                    : "border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10 active:scale-95"
+                )}
+              >
+                {getHint.isPending ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Lightbulb className="w-3.5 h-3.5" />
+                )}
+                {hintText ? "Hint used" : getHint.isPending ? "Thinking…" : `Hint −30 ⚡`}
+              </button>
+            </div>
+          )}
+
+          {/* Hint card */}
+          {hintText && (
+            <div className="animate-in slide-in-from-top-2 fade-in duration-300">
+              <Card className="p-4 bg-yellow-500/5 border border-yellow-500/20">
+                <div className="flex items-start gap-2">
+                  <Lightbulb className="w-4 h-4 text-yellow-400 mt-0.5 shrink-0" />
+                  <p className="text-sm text-yellow-200/90 leading-relaxed">{hintText}</p>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {/* Hint error */}
+          {hintError && !hintText && (
+            <p className="text-xs text-destructive/80 mt-1">{hintError}</p>
+          )}
         </div>
 
         {/* Choices — always A, B, C, D in display order; content is shuffled */}

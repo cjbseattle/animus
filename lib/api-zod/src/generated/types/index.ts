@@ -19,6 +19,8 @@ export * from './getRandomQuestionDifficulty';
 export * from './getRandomQuestionParams';
 export * from './getRandomQuestionType';
 export * from './healthStatus';
+export * from './hintInput';
+export * from './hintResult';
 export * from './listQuestionsParams';
 export * from './listQuestionsType';
 export * from './missedQuestion';
