@@ -39,9 +39,7 @@ export const GetDailyQuestionResponse = zod.object({
  * @summary Get a random SAT question
  */
 export const GetRandomQuestionQueryParams = zod.object({
-  "type": zod.enum(['math', 'reading']).optional(),
-  "difficulty": zod.enum(['easy', 'medium', 'hard']).optional(),
-  "excludeIds": zod.coerce.string().optional()
+  "type": zod.enum(['math', 'reading']).optional()
 })
 
 export const GetRandomQuestionResponse = zod.object({
@@ -81,23 +79,6 @@ export const ListQuestionsResponseItem = zod.object({
   "explanation": zod.string().nullish()
 })
 export const ListQuestionsResponse = zod.array(ListQuestionsResponseItem)
-
-
-/**
- * @summary Get an AI-generated hint for a question (costs currency)
- */
-export const GetQuestionHintParams = zod.object({
-  "id": zod.coerce.number()
-})
-
-export const GetQuestionHintBody = zod.object({
-  "userId": zod.number()
-})
-
-export const GetQuestionHintResponse = zod.object({
-  "hint": zod.string(),
-  "remainingCurrency": zod.number()
-})
 
 
 /**

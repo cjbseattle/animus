@@ -5,14 +5,8 @@
  * Animus SAT Prep API
  * OpenAPI spec version: 0.1.0
  */
-import type { GetRandomQuestionDifficulty } from './getRandomQuestionDifficulty';
 import type { GetRandomQuestionType } from './getRandomQuestionType';
 
 export type GetRandomQuestionParams = {
 type?: GetRandomQuestionType;
-difficulty?: GetRandomQuestionDifficulty;
-/**
- * Comma-separated list of question IDs to exclude
- */
-excludeIds?: string;
 };

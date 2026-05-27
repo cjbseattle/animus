@@ -175,15 +175,6 @@ export interface MissedQuestion {
   attempts: number;
 }
 
-export interface HintInput {
-  userId: number;
-}
-
-export interface HintResult {
-  hint: string;
-  remainingCurrency: number;
-}
-
 export interface UpdateUsernameInput {
   username: string;
 }
@@ -196,11 +187,6 @@ export interface DailyActivity {
 
 export type GetRandomQuestionParams = {
 type?: GetRandomQuestionType;
-difficulty?: GetRandomQuestionDifficulty;
-/**
- * Comma-separated list of question IDs to exclude
- */
-excludeIds?: string;
 };
 
 export type GetRandomQuestionType = typeof GetRandomQuestionType[keyof typeof GetRandomQuestionType];
@@ -209,15 +195,6 @@ export type GetRandomQuestionType = typeof GetRandomQuestionType[keyof typeof Ge
 export const GetRandomQuestionType = {
   math: 'math',
   reading: 'reading',
-} as const;
-
-export type GetRandomQuestionDifficulty = typeof GetRandomQuestionDifficulty[keyof typeof GetRandomQuestionDifficulty];
-
-
-export const GetRandomQuestionDifficulty = {
-  easy: 'easy',
-  medium: 'medium',
-  hard: 'hard',
 } as const;
 
 export type ListQuestionsParams = {

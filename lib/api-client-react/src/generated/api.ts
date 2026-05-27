@@ -29,8 +29,6 @@ import type {
   GetMyActivityParams,
   GetRandomQuestionParams,
   HealthStatus,
-  HintInput,
-  HintResult,
   ListQuestionsParams,
   MissedQuestion,
   PurchaseInput,
@@ -377,78 +375,6 @@ export function useListQuestions<TData = Awaited<ReturnType<typeof listQuestions
 
 
 
-
-export const getGetQuestionHintUrl = (id: number,) => {
-
-
-
-
-  return `/api/questions/${id}/hint`
-}
-
-/**
- * @summary Get an AI-generated hint for a question (costs currency)
- */
-export const getQuestionHint = async (id: number,
-    hintInput: HintInput, options?: RequestInit): Promise<HintResult> => {
-
-  return customFetch<HintResult>(getGetQuestionHintUrl(id),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      hintInput,)
-  }
-);}
-
-
-
-
-export const getGetQuestionHintMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getQuestionHint>>, TError,{id: number;data: BodyType<HintInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof getQuestionHint>>, TError,{id: number;data: BodyType<HintInput>}, TContext> => {
-
-const mutationKey = ['getQuestionHint'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof getQuestionHint>>, {id: number;data: BodyType<HintInput>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  getQuestionHint(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type GetQuestionHintMutationResult = NonNullable<Awaited<ReturnType<typeof getQuestionHint>>>
-    export type GetQuestionHintMutationBody = BodyType<HintInput>
-    export type GetQuestionHintMutationError = ErrorType<void>
-
-    /**
- * @summary Get an AI-generated hint for a question (costs currency)
- */
-export const useGetQuestionHint = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof getQuestionHint>>, TError,{id: number;data: BodyType<HintInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof getQuestionHint>>,
-        TError,
-        {id: number;data: BodyType<HintInput>},
-        TContext
-      > => {
-      return useMutation(getGetQuestionHintMutationOptions(options));
-    }
 
 export const getSubmitAnswerUrl = () => {
 
